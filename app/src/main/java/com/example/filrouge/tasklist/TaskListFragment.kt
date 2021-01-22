@@ -32,7 +32,7 @@ class TaskListFragment : Fragment() {
         recyclerView.adapter = TaskListAdapter(taskList)
         addButton.setOnClickListener {
             taskList.add(Task(id = UUID.randomUUID().toString(), title = "Task ${taskList.size + 1}"))
-            recyclerView.adapter?.notifyDataSetChanged()
+            recyclerView.adapter?.notifyItemChanged(taskList.count() - 1)
         }
     }
 }
