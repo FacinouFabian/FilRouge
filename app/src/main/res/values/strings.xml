@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">FilRouge</string>
+    <string name="text">text</string>
+    <string name="add_list_item">add</string>
 </resources>
