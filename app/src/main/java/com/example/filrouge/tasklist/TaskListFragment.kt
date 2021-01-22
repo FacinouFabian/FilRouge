@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.filrouge.R
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.util.*
 
 
 class TaskListFragment : Fragment() {
@@ -24,13 +26,14 @@ class TaskListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         // Pour une [RecyclerView] ayant l'id "recycler_view":
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
-        val taskList = listOf(
-            Task(id = "id_1", title = "Task 1", description = "My task 1"),
-            Task(id = "id_2", title = "Task 2"),
-            Task(id = "id_3", title = "Task 3")
-        )
+        val addButton = view.findViewById<FloatingActionButton>(R.id.floatingActionButton5)
+        val taskList = mutableListOf<Task>()
         recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.adapter = TaskListAdapter(taskList)
+        addButton.setOnClickListener {
+            taskList.add(Task(id = UUID.randomUUID().toString(), title = "Task ${taskList.size + 1}"))
+            recyclerView.adapter?.notifyDataSetChanged()
+        }
     }
 }
 
