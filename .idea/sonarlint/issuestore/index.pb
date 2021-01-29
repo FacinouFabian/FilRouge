@@ -12,3 +12,7 @@ g
 7app/src/main/java/com/example/filrouge/tasklist/Task.kt,7\c\7cacfff81c647dd6a08e24617056e4cd3d32c1d4
 s
 Capp/src/main/java/com/example/filrouge/tasklist/TaskListFragment.kt,c\0\c02ce66c739ca6ef3ac1f532bc001d89d86bb9ce
+P
+ app/src/main/AndroidManifest.xml,8\c\8c55c3ccc257e5907959013f99656e4c8ec3903e
+k
+;app/src/main/java/com/example/filrouge/task/TaskActivity.kt,2\4\24b4735e7d7d7ae17c1f7fae1bba6922d61ec7c4

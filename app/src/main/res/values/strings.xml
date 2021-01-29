@@ -2,4 +2,9 @@
     <string name="app_name">FilRouge</string>
     <string name="text">text</string>
     <string name="add_list_item">add</string>
+    <string name="remove_list_item">remove_list_item</string>
+    <string name="trash_icon">trash_icon</string>
+    <string name="validate">validate</string>
+    <string name="editicon">editIcon</string>
+    <string name="userInfos">userInfos</string>
 </resources>

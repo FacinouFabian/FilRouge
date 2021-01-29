@@ -1,3 +1,14 @@
 package com.example.filrouge.tasklist
 
-data class Task(val id: String, val title: String, val description: String = "Task_$id")
+import kotlinx.serialization.SerialName
+import java.io.Serializable
+
+@kotlinx.serialization.Serializable
+data class Task(
+    @SerialName("id")
+    val id: String,
+    @SerialName("title")
+    var title: String,
+    @SerialName("description")
+    var description: String = "Task_$this.id"
+): Serializable {}
