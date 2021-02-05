@@ -8,8 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.filrouge.R
@@ -20,13 +23,38 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 import java.util.*
 
+class TaskListViewModel: ViewModel() {
+    private val repository = TasksRepository()
+    private val _taskList = MutableLiveData<List<Task>>()
+    val taskList: LiveData<List<Task>> = _taskList
+
+    fun loadTasks() {
+        viewModelScope.launch {
+            _taskList.value = repository.loadTasks()
+        }
+    }
+    fun deleteTask(task: Task) {
+        viewModelScope.launch {
+            repository.removeTask(task)
+        }
+    }
+    fun addTask(task: Task) {
+        viewModelScope.launch {
+            repository.createTask(task)
+        }
+    }
+    fun editTask(task: Task) {
+        viewModelScope.launch {
+            repository.updateTask(task)
+        }
+    }
+}
 
 class TaskListFragment : Fragment() {
-    private val taskList = mutableListOf<Task>()
-    private val adapter = TaskListAdapter(taskList)
     private val ADD_TASK_REQUEST_CODE = 666
     private val EDIT_TASK_REQUEST_CODE = 667
-    private val tasksRepository = TasksRepository()
+    private val viewModel: TaskListViewModel by viewModels()
+    private var adapter = TaskListAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,14 +75,8 @@ class TaskListFragment : Fragment() {
             val intent = Intent(activity, TaskActivity::class.java)
             startActivityForResult(intent, ADD_TASK_REQUEST_CODE)
         }
-        tasksRepository.taskList.observe(viewLifecycleOwner) { list ->
-            list.map {
-                taskList.add(it)
-            }
-            adapter.notifyDataSetChanged()
-        }
         adapter.onDeleteTask = { task ->
-            taskList.remove(task)
+            viewModel.deleteTask(task)
             adapter.notifyDataSetChanged()
         }
         adapter.onEditTask = { task ->
@@ -62,22 +84,22 @@ class TaskListFragment : Fragment() {
             intent.putExtra("editedTask", task)
             startActivityForResult(intent, EDIT_TASK_REQUEST_CODE)
         }
+        viewModel.taskList.observe(viewLifecycleOwner) { newList ->
+            adapter.taskList = newList
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
         if(requestCode == ADD_TASK_REQUEST_CODE && resultCode == Activity.RESULT_OK){
             val task = data!!.getSerializableExtra(TaskActivity.TASK_KEY) as Task
-            /*System.out.println((taskList))*/
-            taskList.add(task)
+            viewModel.addTask(task)
             adapter.notifyDataSetChanged()
         }
 
         else if (requestCode == EDIT_TASK_REQUEST_CODE && resultCode == Activity.RESULT_OK){
             val task = data!!.getSerializableExtra(TaskActivity.TASK_KEY) as Task
-            taskList.find { it.id == task.id }!!.title = task.title
-            taskList.find { it.id == task.id }!!.description = task.description
+            viewModel.taskList.value?.find { it.id == task.id }!!.title = task.title
+            viewModel.taskList.value?.find { it.id == task.id }!!.description = task.description
             adapter.notifyDataSetChanged()
         }
     }
@@ -91,13 +113,15 @@ class TaskListFragment : Fragment() {
             val userInfo = Api.userService.getInfo().body()!!
             my_text_view?.text = "${userInfo.firstName} ${userInfo.lastName}"
         }
+
         lifecycleScope.launch {
-            tasksRepository.refresh()
+            viewModel.loadTasks()
         }
     }
 }
 
-class TaskListAdapter(private val taskList: List<Task>) : RecyclerView.Adapter<TaskListAdapter.TaskViewHolder>() {
+class TaskListAdapter() : RecyclerView.Adapter<TaskListAdapter.TaskViewHolder>() {
+    var taskList: List<Task> = emptyList()
     var onDeleteTask: ((Task) -> Unit)? = null
     var onEditTask: ((Task) -> Unit)? = null
 
